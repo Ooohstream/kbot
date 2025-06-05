@@ -27,6 +27,7 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
     const replyMessage = await ctx.reply('Error');
     setTimeout(async () => {
       await ctx.deleteMessages([replyMessage.message_id]);
+      if (ctx.message?.chat.type === 'private') return;
       await ctx.deleteMessage();
     }, 2000);
     return;
@@ -41,6 +42,7 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
 
   if (url) {
     await ctx.replyWithVideo(url);
+    if (ctx.message?.chat.type === 'private') return;
     await ctx.deleteMessage();
     return;
   }
