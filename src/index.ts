@@ -15,6 +15,8 @@ const bot = new Bot(token);
 
 bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
   const message = ctx.message?.text;
+  const isPrivateChat = ctx.message?.chat.type === 'private';
+  const isGroupChat = !isPrivateChat;
 
   if (!message) return;
 
@@ -27,7 +29,7 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
     const replyMessage = await ctx.reply('Error');
     setTimeout(async () => {
       await ctx.deleteMessages([replyMessage.message_id]);
-      if (ctx.message?.chat.type === 'private') return;
+      if (isPrivateChat) return;
       await ctx.deleteMessage();
     }, 2000);
     return;
@@ -41,8 +43,17 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
     ?.getAttribute('href');
 
   if (url) {
-    await ctx.replyWithVideo(url);
-    if (ctx.message?.chat.type === 'private') return;
+    let caption = undefined;
+
+    if (isGroupChat) {
+      caption = {
+        caption: ctx?.message?.from.username,
+        show_caption_above_media: true,
+      };
+    }
+
+    await ctx.replyWithVideo(url, caption);
+    if (isPrivateChat) return;
     await ctx.deleteMessage();
     return;
   }
