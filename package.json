@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node build/index.js",
     "build": "eslint src && tsc",
-    "dev": "ts-node-dev --respawn --transpile-only --env-file=.env src/index.ts"
+    "dev": "ts-node-dev --respawn --transpile-only --env-file=.env src/index.ts",
+    "pre": "tsc --noEmit && eslint src"
   },
   "keywords": [],
   "author": "",

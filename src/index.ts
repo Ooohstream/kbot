@@ -1,8 +1,16 @@
-import { Bot, webhookCallback } from 'grammy';
+import { Bot, Context, HearsContext, webhookCallback } from 'grammy';
 import parse from 'node-html-parser';
 import axios from 'axios';
 import { ReelResponse } from './types';
 import express from 'express';
+
+const safelyDeleteMessage = async (ctx: HearsContext<Context>) => {
+  try {
+    await ctx.deleteMessage();
+  } catch {
+    console.log("Message doesn't exists");
+  }
+};
 
 const token = process.env.TOKEN;
 
@@ -30,7 +38,7 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
     setTimeout(async () => {
       await ctx.deleteMessages([replyMessage.message_id]);
       if (isPrivateChat) return;
-      await ctx.deleteMessage();
+      await safelyDeleteMessage(ctx);
     }, 2000);
     return;
   }
@@ -43,19 +51,16 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
     ?.getAttribute('href');
 
   if (url) {
-    let caption = undefined;
-
-    if (isGroupChat) {
-      caption = {
-        caption: ctx?.message?.from.username,
-        show_caption_above_media: true,
-      };
-    }
-
-    await ctx.replyWithVideo(url, caption);
+    await ctx.replyWithVideo(
+      url,
+      (isGroupChat && {
+        caption: '`' + ctx?.message?.from.username + '`',
+        parse_mode: 'MarkdownV2',
+      }) ||
+        void 0,
+    );
     if (isPrivateChat) return;
-    await ctx.deleteMessage();
-    return;
+    await safelyDeleteMessage(ctx);
   }
 });
 
