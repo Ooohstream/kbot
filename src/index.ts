@@ -1,8 +1,7 @@
-import { Bot, Context, HearsContext, webhookCallback } from 'grammy';
+import { Bot, Context, HearsContext } from 'grammy';
 import parse from 'node-html-parser';
 import axios from 'axios';
 import { ReelResponse } from './types';
-import express from 'express';
 
 const safelyDeleteMessage = async (ctx: HearsContext<Context>) => {
   try {
@@ -65,32 +64,5 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
 });
 
 void (async () => {
-  if (process.env.NODE_ENV !== 'production') {
-    await bot.start();
-    console.log('The bot has been started via long-polling.');
-    return;
-  }
-
-  const app = express();
-  app.use(express.json());
-  const domain = process.env.DOMAIN;
-
-  if (!domain) {
-    console.log('No domain provided');
-    process.exit(1);
-  }
-
-  app.use(`/${token}`, webhookCallback(bot, 'express'));
-  app.get('/', (req, res) => {
-    res
-      .send({
-        status: 'ok',
-        message: 'If you see this message everything works correctly!',
-      })
-      .status(200);
-  });
-  app.listen(Number(process.env.PORT), async () => {
-    await bot.api.setWebhook(`https://${domain}/${token}`);
-    console.log('The bot has been started via webhook!');
-  });
+  await bot.start();
 })();

@@ -8,14 +8,9 @@
     "dev": "ts-node-dev --respawn --transpile-only --env-file=.env src/index.ts",
     "pre": "tsc --noEmit && eslint src"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "@types/express": "^5.0.2",
     "axios": "^1.9.0",
-    "express": "^5.1.0",
     "grammy": "^1.36.3",
     "node-html-parser": "^7.0.1"
   },
