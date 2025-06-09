@@ -48,7 +48,7 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
     .getElementsByTagName('a')
     .at(-1)
     ?.getAttribute('href')
-    ?.replace('pic5', 'pic6');
+    ?.replace(/pic\d/, 'pic4');
 
   if (url) {
     await ctx.replyWithVideo(
