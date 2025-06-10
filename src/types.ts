@@ -1,1 +1,3 @@
-export type ReelResponse = { html: string; status: 'ok' } | { status: 'error' };
+export type ReelResponse =
+  | { medias: [{ url: string }]; success: true }
+  | { success: false };

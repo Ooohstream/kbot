@@ -1,5 +1,4 @@
 import { Bot, Context, HearsContext } from 'grammy';
-import parse from 'node-html-parser';
 import axios from 'axios';
 import { ReelResponse } from './types';
 
@@ -27,12 +26,13 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
 
   if (!message) return;
 
-  const { data } = await axios.get<ReelResponse>(
-    `https://content.mollygram.com/?url=${message}`,
+  const { data } = await axios.post<ReelResponse>(
+    `https://www.clipto.com/api/youtube`,
+    { url: message },
   );
-  const { status } = data;
+  const { success } = data;
 
-  if (status === 'error') {
+  if (!success) {
     const replyMessage = await ctx.reply('Error');
     setTimeout(async () => {
       await ctx.deleteMessages([replyMessage.message_id]);
@@ -42,26 +42,26 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
     return;
   }
 
-  const { html } = data;
+  const { url } = data.medias[0];
 
-  const url = parse(html)
-    .getElementsByTagName('a')
-    .at(-1)
-    ?.getAttribute('href')
-    ?.replace(/pic\d/, 'pic4');
+  if (!url) return;
 
-  if (url) {
-    await ctx.replyWithVideo(
-      url,
-      (isGroupChat && {
-        caption: '`' + ctx?.message?.from.username + '`',
-        parse_mode: 'MarkdownV2',
-      }) ||
-        void 0,
-    );
-    if (isPrivateChat) return;
-    await safelyDeleteMessage(ctx);
-  }
+  const parsedUrl = new URL(url);
+  const cdnUrl = url.replace(
+    parsedUrl.origin,
+    'https://scontent.cdninstagram.com',
+  );
+
+  await ctx.replyWithVideo(
+    cdnUrl,
+    (isGroupChat && {
+      caption: '`' + ctx?.message?.from.username + '`',
+      parse_mode: 'MarkdownV2',
+    }) ||
+      void 0,
+  );
+  if (isPrivateChat) return;
+  await safelyDeleteMessage(ctx);
 });
 
 void (async () => {
