@@ -34,6 +34,7 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
 
   if (!success) {
     const replyMessage = await ctx.reply('Error');
+    console.error(data);
     setTimeout(async () => {
       await ctx.deleteMessages([replyMessage.message_id]);
       if (isPrivateChat) return;
