@@ -66,5 +66,5 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
 });
 
 void (async () => {
-  await bot.start();
+  await bot.start({ drop_pending_updates: true });
 })();
