@@ -1,14 +1,8 @@
-import { Bot, Context, HearsContext } from 'grammy';
+import { Bot } from 'grammy';
 import axios from 'axios';
 import { ReelResponse } from './types';
 
-const safelyDeleteMessage = async (ctx: HearsContext<Context>) => {
-  try {
-    await ctx.deleteMessage();
-  } catch {
-    console.log("Message doesn't exists");
-  }
-};
+import { getChatType, replyWithError, safelyDeleteMessage } from './utils';
 
 const token = process.env.TOKEN;
 
@@ -21,8 +15,7 @@ const bot = new Bot(token);
 
 bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
   const message = ctx.message?.text;
-  const isPrivateChat = ctx.message?.chat.type === 'private';
-  const isGroupChat = !isPrivateChat;
+  const { isGroupChat, isPrivateChat } = getChatType(ctx);
 
   if (!message) return;
 
@@ -33,13 +26,8 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
   const { success } = data;
 
   if (!success) {
-    const replyMessage = await ctx.reply('Error');
     console.error(data);
-    setTimeout(async () => {
-      await ctx.deleteMessages([replyMessage.message_id]);
-      if (isPrivateChat) return;
-      await safelyDeleteMessage(ctx);
-    }, 2000);
+    await replyWithError(ctx);
     return;
   }
 
@@ -63,6 +51,11 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
   );
   if (isPrivateChat) return;
   await safelyDeleteMessage(ctx);
+});
+
+bot.catch(async (error) => {
+  console.error(error.message);
+  await replyWithError(error.ctx);
 });
 
 void (async () => {
