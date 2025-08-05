@@ -2,6 +2,7 @@ import { Bot } from 'grammy';
 
 import { replyWithError } from './utils';
 import { reddit, instagram } from './downloaders';
+import { x } from './downloaders/x';
 
 const token = process.env.TOKEN;
 
@@ -14,6 +15,7 @@ export const bot = new Bot(token);
 
 bot.use(reddit);
 bot.use(instagram);
+bot.use(x);
 
 bot.catch(async (error) => {
   console.error(error.message);
