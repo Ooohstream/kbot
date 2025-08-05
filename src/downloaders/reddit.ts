@@ -1,10 +1,11 @@
-import { getChatType, replyWithError, safelyDeleteMessage } from './utils';
+import { getChatType, replyWithError, safelyDeleteMessage } from '../utils';
 import axios from 'axios';
 import parse from 'node-html-parser';
-import { InputFile } from 'grammy';
-import { bot } from './index';
+import { Composer, InputFile } from 'grammy';
 
-bot.hears(/https:\/\/www.reddit.com\/.+/, async (ctx) => {
+export const reddit = new Composer();
+
+reddit.hears(/https:\/\/www.reddit.com\/.+/, async (ctx) => {
   const message = ctx.message?.text;
   const { isGroupChat, isPrivateChat } = getChatType(ctx);
 

@@ -1,9 +1,11 @@
-import { getChatType, replyWithError, safelyDeleteMessage } from './utils';
+import { getChatType, replyWithError, safelyDeleteMessage } from '../utils';
 import axios from 'axios';
-import { ReelResponse } from './types';
-import { bot } from './index';
+import { ReelResponse } from '../types';
+import { Composer } from 'grammy';
 
-bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
+export const instagram = new Composer();
+
+instagram.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
   const message = ctx.message?.text;
   const { isGroupChat, isPrivateChat } = getChatType(ctx);
 
