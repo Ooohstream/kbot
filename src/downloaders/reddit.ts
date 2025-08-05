@@ -28,7 +28,7 @@ reddit.hears(/https:\/\/www.reddit.com\/.+/, async (ctx) => {
   }
 
   await ctx.replyWithVideo(
-    new InputFile(new URL(url)),
+    new InputFile(new URL(url), 'f.mp4'),
     (isGroupChat && {
       caption: '`' + ctx?.message?.from.username + '`',
       parse_mode: 'MarkdownV2',
