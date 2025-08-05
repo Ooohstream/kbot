@@ -1,8 +1,9 @@
-import { Bot } from 'grammy';
+import { Bot, InputFile } from 'grammy';
 import axios from 'axios';
 import { ReelResponse } from './types';
 
 import { getChatType, replyWithError, safelyDeleteMessage } from './utils';
+import parse from 'node-html-parser';
 
 const token = process.env.TOKEN;
 
@@ -12,7 +13,6 @@ if (!token) {
 }
 
 const bot = new Bot(token);
-
 bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
   const message = ctx.message?.text;
   const { isGroupChat, isPrivateChat } = getChatType(ctx);
@@ -50,6 +50,42 @@ bot.hears(/https:\/\/www.instagram.com\/reel\/.+/, async (ctx) => {
       void 0,
   );
   if (isPrivateChat) return;
+  await safelyDeleteMessage(ctx);
+});
+
+bot.hears(/https:\/\/www.reddit.com\/.+/, async (ctx) => {
+  const message = ctx.message?.text;
+  const { isGroupChat, isPrivateChat } = getChatType(ctx);
+
+  if (!message) return;
+
+  const { data } = await axios.get<string>(
+    `https://rapidsave.com/info?url=${message}`,
+  );
+
+  const dom = parse(data);
+
+  const url = dom
+    .querySelector('.download-info')
+    ?.getElementsByTagName('a')[0]
+    .getAttribute('href');
+
+  if (!url) {
+    await replyWithError(ctx);
+    return;
+  }
+
+  await ctx.replyWithVideo(
+    new InputFile(new URL(url)),
+    (isGroupChat && {
+      caption: '`' + ctx?.message?.from.username + '`',
+      parse_mode: 'MarkdownV2',
+    }) ||
+      void 0,
+  );
+
+  if (isPrivateChat) return;
+
   await safelyDeleteMessage(ctx);
 });
 
